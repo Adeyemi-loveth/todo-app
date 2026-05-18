@@ -1,0 +1,5 @@
+flask
+celery
+redis
+flask-sqlalchemy
+psycopg2-binary

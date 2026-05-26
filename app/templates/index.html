@@ -4,22 +4,38 @@
   <title>Todo App</title>
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }
-    input[type="text"] { padding: 10px; width: 70%; border: 1px solid #ccc; border-radius: 4px; }
+    input[type="text"] { padding: 10px; width: 50%; border: 1px solid #ccc; border-radius: 4px; }
+    input[type="datetime-local"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
     button { padding: 10px 16px; background: #5c6bc0; color: white; border: none; border-radius: 4px; cursor: pointer; }
     ul { list-style: none; padding: 0; margin-top: 24px; }
     li { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #eee; }
     .done-text { text-decoration: line-through; color: #aaa; }
     .del { margin-left: auto; background: #e57373; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
     .toggle { background: #81c784; }
+    .error { background: #fdecea; color: #c62828; padding: 12px; border-radius: 4px; margin-top: 12px; border-left: 4px solid #e57373; }
+    .due { font-size: 12px; color: #888; }
+    nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
   </style>
 </head>
 <body>
+  <nav>
+    <span>Hello, {{ current_user.name }}!</span>
+    <a href="/logout">
+      <button style="background:#e57373">Logout</button>
+    </a>
+  </nav>
+
   <h1>My Todo List</h1>
 
   <form action="/todos/add" method="POST">
-    <input type="text" name="title" placeholder="What needs to be done?" required />
+    <input type="text" name="title" placeholder="What needs to be done?" />
+    <input type="datetime-local" name="due_at" />
     <button type="submit">Add</button>
   </form>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
 
   <ul>
     {% for todo in todos %}
@@ -30,7 +46,12 @@
         </button>
       </form>
 
-      <span class="{{ 'done-text' if todo.done else '' }}">{{ todo.title }}</span>
+      <div>
+        <span class="{{ 'done-text' if todo.done else '' }}">{{ todo.title }}</span>
+        {% if todo.due_at %}
+        <div class="due">Due: {{ todo.due_at.strftime("%Y-%m-%d %H:%M") }}</div>
+        {% endif %}
+      </div>
 
       <form action="/todos/{{ todo.id }}/delete" method="POST" style="margin-left:auto">
         <button class="del" type="submit">✕</button>

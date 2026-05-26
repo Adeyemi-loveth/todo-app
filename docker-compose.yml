@@ -6,12 +6,19 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/tododb
       - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=supersecretkey123
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=adeyemiloveth27@gmail.com
+      - MAIL_PASSWORD=ysgc rqci ihpp uqed
     depends_on:
       - db
       - redis
 
   db:
     image: postgres:15
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -28,6 +35,26 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/tododb
       - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=supersecretkey123
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=adeyemiloveth27@gmail.com
+      - MAIL_PASSWORD=ysgc rqci ihpp uqed
+    depends_on:
+      - redis
+      - db
+
+  celery-beat:
+    build: .
+    command: celery -A celery_worker.celery beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/tododb
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=supersecretkey123
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=adeyemiloveth27@gmail.com
+      - MAIL_PASSWORD=ysgc rqci ihpp uqed
     depends_on:
       - redis
       - db

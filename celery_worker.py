@@ -23,6 +23,24 @@ def make_celery():
 celery = make_celery()
 
 @celery.task
+def send_reset_email(user_email, reset_url):
+    """
+    Sends password reset email in the background.
+    Flask queues this and responds immediately —
+    user doesn't wait for Gmail to respond.
+    """
+    from app import create_app
+    from app.utils.email import EmailUtil
+
+    flask_app = create_app()
+    with flask_app.app_context():
+        try:
+            EmailUtil.send_password_reset(user_email, reset_url)
+            print(f"[RESET EMAIL] Sent to {user_email}")
+        except Exception as e:
+            print(f"[RESET EMAIL] Failed to send to {user_email}: {e}")
+
+@celery.task
 def check_due_todos():
     from datetime import datetime, timedelta
     from app import create_app, db

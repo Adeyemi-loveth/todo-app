@@ -3,26 +3,36 @@
 <head>
   <title>Todo App</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }
-    input[type="text"] { padding: 10px; width: 50%; border: 1px solid #ccc; border-radius: 4px; }
+    body { font-family: sans-serif; max-width: 680px; margin: 60px auto; padding: 0 20px; }
+    input[type="text"] { padding: 10px; width: 35%; border: 1px solid #ccc; border-radius: 4px; }
     input[type="datetime-local"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
     button { padding: 10px 16px; background: #5c6bc0; color: white; border: none; border-radius: 4px; cursor: pointer; }
     ul { list-style: none; padding: 0; margin-top: 24px; }
     li { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #eee; }
     .done-text { text-decoration: line-through; color: #aaa; }
-    .del { margin-left: auto; background: #e57373; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+    .del { background: #e57373; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
     .toggle { background: #81c784; }
     .error { background: #fdecea; color: #c62828; padding: 12px; border-radius: 4px; margin-top: 12px; border-left: 4px solid #e57373; }
     .due { font-size: 12px; color: #888; }
+    .cat-tag { font-size: 11px; background: #e8eaf6; color: #3949ab; padding: 2px 8px; border-radius: 10px; }
     nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .filters { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 14px; border-radius: 16px; border: 1px solid #ccc; background: white; cursor: pointer; color: #333; font-size: 13px; }
+    .filter-btn.active { background: #5c6bc0; color: white; border-color: #5c6bc0; }
+    .pagination { display: flex; gap: 8px; margin-top: 24px; align-items: center; }
+    .page-btn { padding: 8px 14px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer; color: #333; text-decoration: none; }
+    .page-btn.active { background: #5c6bc0; color: white; border-color: #5c6bc0; }
+    a { color: #5c6bc0; }
   </style>
 </head>
 <body>
   <nav>
     <span>Hello, {{ current_user.name }}!</span>
-    <a href="/logout">
-      <button style="background:#e57373">Logout</button>
-    </a>
+    <div style="display:flex; gap:10px;">
+      <a href="/categories"><button style="background:#7986cb">Categories</button></a>
+      <a href="/logout"><button style="background:#e57373">Logout</button></a>
+    </div>
   </nav>
 
   <h1>My Todo List</h1>
@@ -30,6 +40,12 @@
   <form action="/todos/add" method="POST">
     <input type="text" name="title" placeholder="What needs to be done?" />
     <input type="datetime-local" name="due_at" />
+    <select name="category_id">
+      <option value="">No category</option>
+      {% for cat in categories %}
+      <option value="{{ cat.id }}">{{ cat.name }}</option>
+      {% endfor %}
+    </select>
     <button type="submit">Add</button>
   </form>
 
@@ -37,20 +53,33 @@
   <div class="error">{{ error }}</div>
   {% endif %}
 
+  <div class="filters">
+    <a href="/"><button class="filter-btn {% if not selected_category %}active{% endif %}">All</button></a>
+    {% for cat in categories %}
+    <a href="/?category_id={{ cat.id }}">
+      <button class="filter-btn {% if selected_category == cat.id %}active{% endif %}">{{ cat.name }}</button>
+    </a>
+    {% endfor %}
+  </div>
+
+ 
   <ul>
     {% for todo in todos %}
     <li>
       <form action="/todos/{{ todo.id }}/toggle" method="POST">
-        <button class="toggle" type="submit">
-          {{ "✓" if todo.done else "○" }}
-        </button>
+        <button class="toggle" type="submit">{{ "✓" if todo.done else "○" }}</button>
       </form>
 
       <div>
         <span class="{{ 'done-text' if todo.done else '' }}">{{ todo.title }}</span>
-        {% if todo.due_at %}
-        <div class="due">Due: {{ todo.due_at.strftime("%Y-%m-%d %H:%M") }}</div>
-        {% endif %}
+        <div style="display:flex; gap:6px; margin-top:2px; flex-wrap:wrap;">
+          {% if todo.category %}
+          <span class="cat-tag">{{ todo.category.name }}</span>
+          {% endif %}
+          {% if todo.due_at %}
+          <span class="due">Due: {{ todo.due_at.strftime("%Y-%m-%d %H:%M") }}</span>
+          {% endif %}
+        </div>
       </div>
 
       <form action="/todos/{{ todo.id }}/delete" method="POST" style="margin-left:auto">
@@ -59,5 +88,30 @@
     </li>
     {% endfor %}
   </ul>
+
+
+  {% if pagination.pages > 1 %}
+  <div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="?page={{ pagination.prev_num }}{% if selected_category %}&category_id={{ selected_category }}{% endif %}" class="page-btn">← Prev</a>
+    {% endif %}
+
+    {% for p in pagination.iter_pages() %}
+      {% if p %}
+      <a href="?page={{ p }}{% if selected_category %}&category_id={{ selected_category }}{% endif %}"
+         class="page-btn {% if p == pagination.page %}active{% endif %}">{{ p }}</a>
+      {% else %}
+      <span style="padding: 8px 4px;">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="?page={{ pagination.next_num }}{% if selected_category %}&category_id={{ selected_category }}{% endif %}" class="page-btn">Next →</a>
+    {% endif %}
+
+    <span style="font-size:13px; color:#888;">{{ pagination.total }} todos</span>
+  </div>
+  {% endif %}
+
 </body>
 </html>

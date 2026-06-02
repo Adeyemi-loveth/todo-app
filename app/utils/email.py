@@ -16,3 +16,18 @@ class EmailUtil:
             f"- Your Todo App"
         )
         mail.send(msg)
+
+    @staticmethod
+    def send_password_reset(user_email, reset_url):
+        msg = Message(
+            subject="Password Reset Request",
+            recipients=[user_email]
+        )
+        msg.body = (
+            f"You requested a password reset.\n\n"
+            f"Click the link below to reset your password (valid for 30 minutes):\n"
+            f"{reset_url}\n\n"
+            f"If you did not request this, ignore this email.\n\n"
+            f"- Your Todo App"
+        )
+        mail.send(msg)

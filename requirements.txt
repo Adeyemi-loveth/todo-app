@@ -3,7 +3,10 @@ flask-sqlalchemy
 flask-login
 flask-mail
 flask-bcrypt
+flask-migrate
 psycopg2-binary
 celery
 celery[beat]
 redis
+gunicorn
+itsdangerous

@@ -8,7 +8,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=supersecretkey123
       - MAIL_SERVER=smtp.gmail.com
-      - MAIL_PORT=587
+      - MAIL_PORT=465
+      - MAIL_USE_SSL=True
       - MAIL_USERNAME=adeyemiloveth27@gmail.com
       - MAIL_PASSWORD=ysgc rqci ihpp uqed
     depends_on:
@@ -37,7 +38,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=supersecretkey123
       - MAIL_SERVER=smtp.gmail.com
-      - MAIL_PORT=587
+      - MAIL_PORT=465
+      - MAIL_USE_SSL=True
       - MAIL_USERNAME=adeyemiloveth27@gmail.com
       - MAIL_PASSWORD=ysgc rqci ihpp uqed
     depends_on:
@@ -52,7 +54,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=supersecretkey123
       - MAIL_SERVER=smtp.gmail.com
-      - MAIL_PORT=587
+      - MAIL_PORT=465
+      - MAIL_USE_SSL=True
       - MAIL_USERNAME=adeyemiloveth27@gmail.com
       - MAIL_PASSWORD=ysgc rqci ihpp uqed
     depends_on:

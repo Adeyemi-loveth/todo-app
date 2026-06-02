@@ -18,5 +18,5 @@ PYEOF
   fi
   sleep 2
 done
-echo "Postgres is ready — starting Flask"
-exec flask run --host=0.0.0.0
+echo "Postgres is ready — starting Gunicorn"
+exec gunicorn --bind 0.0.0.0:5000 --workers 3 wsgi:app
